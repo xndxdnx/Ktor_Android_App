@@ -6,7 +6,6 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.ktor.util.Constants
 import com.example.ktor.util.Constants.DETAILS_ARGUMENT_KEY
 
 @Composable
