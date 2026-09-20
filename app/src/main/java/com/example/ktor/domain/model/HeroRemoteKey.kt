@@ -6,8 +6,8 @@ import com.example.ktor.util.Constants.HERO_REMOTE_KEY_DATABASE
 
 @Entity(tableName = HERO_REMOTE_KEY_DATABASE)
 data class HeroRemoteKey(
-    val prevKey: Int?,
-    val nextKey: Int?,
+    val prevPage: Int?,
+    val nextPage: Int?,
     @PrimaryKey(autoGenerate = false)
     val id : Int
 )
