@@ -14,11 +14,11 @@ import com.example.ktor.domain.model.HeroRemoteKey
     entities = [
         Hero::class,
         HeroRemoteKey::class
-    ], 
+    ],
     version = 1
 )
 @TypeConverters(DatabaseConverter::class)
 abstract class HeroDatabase() : RoomDatabase() {
     abstract fun heroDao(): HeroDao
-    abstract fun heroRemoteKeyDao() : HeroRemoteKeyDao
+    abstract fun heroRemoteKeyDao(): HeroRemoteKeyDao
 }

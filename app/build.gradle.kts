@@ -45,10 +45,9 @@ dependencies {
     // KotlinX Serialization
     
     implementation(libs.kotlinx.serialization.json)
-
-
     implementation(libs.androidx.paging.compose)
-
+    implementation(libs.room.paging)
+    
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)

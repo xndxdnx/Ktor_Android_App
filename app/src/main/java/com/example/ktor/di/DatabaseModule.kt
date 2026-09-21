@@ -2,6 +2,7 @@ package com.example.ktor.di
 
 import android.content.Context
 import androidx.room.Room
+import androidx.room.RoomDatabase
 import com.example.ktor.data.database.HeroDatabase
 import dagger.Module
 import dagger.Provides
@@ -13,19 +14,14 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
-    
-    
+
     @Provides
     @Singleton
-    fun provideDatabase(
-        @ApplicationContext
-        context: Context
-    ){
-        Room.databaseBuilder(
-            context = context,
-            klass = HeroDatabase::class.java,
-            name = "table"
-        )
-    }
-    
+    fun provideDatabase(@ApplicationContext context: Context): RoomDatabase = Room.databaseBuilder(
+        context = context,
+        klass = HeroDatabase::class.java,
+        name = "table"
+    ).build()
+
+
 }
