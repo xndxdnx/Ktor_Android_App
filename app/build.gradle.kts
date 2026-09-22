@@ -42,6 +42,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.ads.mobile.sdk)
     // KotlinX Serialization
     
     implementation(libs.kotlinx.serialization.json)
