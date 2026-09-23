@@ -44,6 +44,8 @@ android {
 dependencies {
     implementation(libs.ads.mobile.sdk)
     // KotlinX Serialization
+
+    implementation(libs.androidx.datastore)
     
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.paging.compose)
