@@ -19,10 +19,13 @@ coroutines = "1.10.2"
 pagingCompose = "3.3.2"
 kotlinxSerializationJson = "1.5.1"
 adsMobileSdk = "1.4.0"
-
+dataStorePref = "1.2.1"
 
 
 [libraries]
+
+
+androidx-datastore = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "dataStorePref"}
 
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
