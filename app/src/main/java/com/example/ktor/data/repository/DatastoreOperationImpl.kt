@@ -1,4 +1,4 @@
-package com.example.ktor.data.pref_datastore
+package com.example.ktor.data.repository
 
 import android.content.Context
 import androidx.datastore.core.DataStore
