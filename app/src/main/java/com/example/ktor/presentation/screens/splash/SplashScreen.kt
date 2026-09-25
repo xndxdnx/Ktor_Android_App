@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -21,19 +22,41 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.ktor.R
+import com.example.ktor.navigation.Screens
 import com.example.ktor.ui.theme.Purple40
 import com.example.ktor.ui.theme.Purple80
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun SplashScreen(
-    navHostController: NavHostController
+    navHostController: NavHostController,
+    viewModel: SplashScreenViewModel = hiltViewModel()
 ) {
+    
+    val onboardingCompleted = viewModel.onboardingCompleted.collectAsState()
 
-
+    Splash()
+    
+    LaunchedEffect(Unit) {
+        delay(2.seconds)
+        navHostController.popBackStack()
+        if (onboardingCompleted.value){
+            navHostController.navigate(Screens.HomeScreen.route)
+        }else{
+            navHostController.navigate(Screens.WelcomeScreen.route)
+        }
+        
+        
+    }
+    
+    
+    
+    
 }
-
 
 @Composable
 fun Splash() {

@@ -1,4 +1,4 @@
-package com.example.ktor.presentation.screens.welcome.weclome_screen
+package com.example.ktor.presentation.screens.welcome
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
@@ -22,16 +22,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.example.ktor.domain.model.OnBoardingPage
 import com.example.ktor.navigation.Screens
 import com.example.ktor.ui.theme.activeIndicatorColor
@@ -48,7 +48,8 @@ import com.example.ktor.util.SMALL_PADDING
 
 @Composable
 fun WelcomeScreen(
-    navHostController: NavHostController
+    navHostController: NavHostController,
+    viewModel: WelcomeScreenViewModel = hiltViewModel()
 ) {
 
     val pages = listOf<OnBoardingPage>(OnBoardingPage.First, OnBoardingPage.Second, OnBoardingPage.Third)
@@ -83,6 +84,7 @@ fun WelcomeScreen(
                 .weight(1f),
             pagerState = pagesState,
             onClick = {
+                viewModel.saveOnboardingState(true)
                 navHostController.popBackStack()
                 navHostController.navigate(route = Screens.HomeScreen.route)
             }
@@ -136,8 +138,8 @@ fun HorizontalPagerIndicator(
     modifier: Modifier = Modifier,
     state: PagerState,
     pageCount: Int,
-    activeColor: androidx.compose.ui.graphics.Color,
-    inactiveColor: androidx.compose.ui.graphics.Color,
+    activeColor: Color,
+    inactiveColor: Color,
     indicatorWidth: Dp = PAGING_INDICATOR_WIDTH,
     spacing: Dp = PAGING_INDICATOR_SPACING
 ) {
