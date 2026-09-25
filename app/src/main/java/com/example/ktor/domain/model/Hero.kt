@@ -3,8 +3,11 @@ package com.example.ktor.domain.model
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.example.ktor.util.Constants.HERO_DATABASE_TABLE
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Serializer
 
 @Entity(tableName = HERO_DATABASE_TABLE)
+@Serializable
 data class Hero(
     @PrimaryKey(autoGenerate = false)
     val id: Int,
