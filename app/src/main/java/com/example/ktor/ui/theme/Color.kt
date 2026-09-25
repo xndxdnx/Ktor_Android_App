@@ -34,3 +34,8 @@ fun welcomeScreenDescriptionColor() : Color = if (isSystemInDarkTheme()) DarkGra
 @Composable
 fun buttonWelcomeColor() : Color = if (isSystemInDarkTheme()) Purple40 else Purple80
 
+@Composable
+fun topAppBarBackgroundColor() : Color = if (isSystemInDarkTheme()) Color.Black else Purple40
+
+@Composable
+fun topAppBarContentColor() : Color = if (isSystemInDarkTheme()) LightGray else Color.White
