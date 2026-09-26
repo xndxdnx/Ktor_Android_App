@@ -7,4 +7,6 @@ object Constants {
     const val ONBOARDING_PAGE_COUNT = 3
     const val ONBOARDING_PREF_TABLE_NAME = "onboarding_table"
     const val ONBOARDING_PREF_KEY = "onboarding_key"
+    const val BASE_URL = "http://10.0.2.2:8080/"
+    
 }
