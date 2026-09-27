@@ -1,6 +1,9 @@
 package com.example.ktor.di
 
+import com.example.ktor.data.database.HeroDatabase
 import com.example.ktor.data.remote.KtorApi
+import com.example.ktor.data.repository.RemoteDataSourceImpl
+import com.example.ktor.domain.repository.RemoteDataSource
 import com.example.ktor.util.Constants.BASE_URL
 import dagger.Module
 import dagger.Provides
@@ -47,6 +50,10 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideKtorApi(retrofit: Retrofit) : KtorApi = retrofit.create(KtorApi::class.java)
-        
-    
+
+    @Provides
+    @Singleton
+    fun provideRemoteDatasource(api: KtorApi, database: HeroDatabase) :  RemoteDataSource {
+        return RemoteDataSourceImpl(api, database)
+    }
 }
