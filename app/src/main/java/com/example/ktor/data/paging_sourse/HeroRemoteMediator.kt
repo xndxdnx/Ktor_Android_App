@@ -23,14 +23,9 @@ class HeroRemoteMediator @Inject constructor(
 //        
 //        val currentTime = System.currentTimeMillis()
 //        val lastUpdater = heroRemoteKeysDao.getRemoteKey(1)?.lastUpdater
-//        
-//        
-//        
-//        
 //        return super.initialize()
 //    }
-
-
+    
     override suspend fun load(
         loadType: LoadType,
         state: PagingState<Int, Hero>
