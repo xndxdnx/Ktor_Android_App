@@ -5,6 +5,7 @@ import com.example.ktor.data.repository.DatastoreOperationImpl
 import com.example.ktor.data.repository.Repository
 import com.example.ktor.domain.repository.DatastoreOperations
 import com.example.ktor.domain.usecase.UseCases
+import com.example.ktor.domain.usecase.get_all_heroes.GetAllHeroesUseCase
 import com.example.ktor.domain.usecase.read_onboarding.ReadOnboardingUseCase
 import com.example.ktor.domain.usecase.save_onboarding.SaveOnboardingUseCase
 import dagger.Module
@@ -31,7 +32,8 @@ object RepositoryModule {
     ): UseCases{
         return UseCases(
             readOnboardingUseCase = ReadOnboardingUseCase(repository),
-            saveOnboardingUseCase = SaveOnboardingUseCase(repository)
+            saveOnboardingUseCase = SaveOnboardingUseCase(repository),
+            getAllHeroesUseCase = GetAllHeroesUseCase(repository)
         )
     }
     

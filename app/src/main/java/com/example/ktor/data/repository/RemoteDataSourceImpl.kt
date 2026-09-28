@@ -18,7 +18,6 @@ class RemoteDataSourceImpl @Inject constructor(
     private val database: HeroDatabase
 ) : RemoteDataSource {
     
-    
     private val heroDao = database.heroDao()
     
     @OptIn(ExperimentalPagingApi::class)
