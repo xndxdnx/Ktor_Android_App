@@ -42,3 +42,6 @@ fun topAppBarBackgroundColor() : Color = if (isSystemInDarkTheme()) Color.Black 
 
 @Composable
 fun topAppBarContentColor() : Color = if (isSystemInDarkTheme()) LightGray else Color.White
+
+@Composable
+fun topAppContentColor() : Color = if (isSystemInDarkTheme()) LightGray else Color.White

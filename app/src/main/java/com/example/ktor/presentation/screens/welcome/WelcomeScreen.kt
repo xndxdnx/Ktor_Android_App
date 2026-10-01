@@ -41,7 +41,7 @@ import com.example.ktor.ui.theme.welcomeScreenBackgroundColor
 import com.example.ktor.ui.theme.welcomeScreenDescriptionColor
 import com.example.ktor.ui.theme.welcomeScreenTitleColor
 import com.example.ktor.util.Constants.ONBOARDING_PAGE_COUNT
-import com.example.ktor.util.EXTRA_LAGE_PADDING
+import com.example.ktor.util.EXTRA_LARGE_PADDING
 import com.example.ktor.util.PAGING_INDICATOR_SPACING
 import com.example.ktor.util.PAGING_INDICATOR_WIDTH
 import com.example.ktor.util.SMALL_PADDING
@@ -121,7 +121,7 @@ fun PagerScreen(
         Text(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = EXTRA_LAGE_PADDING)
+                .padding(horizontal = EXTRA_LARGE_PADDING)
                 .padding(top = SMALL_PADDING),
             text = onBoardingPage.description,
             color = welcomeScreenDescriptionColor(),
@@ -178,7 +178,7 @@ fun FinishButton(
 ) {
     Row(
         modifier = modifier
-            .padding(EXTRA_LAGE_PADDING),
+            .padding(EXTRA_LARGE_PADDING),
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.Center,
     ) {
