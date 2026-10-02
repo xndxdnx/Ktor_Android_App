@@ -20,6 +20,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
@@ -40,43 +47,104 @@ import com.example.ktor.R
 import com.example.ktor.domain.model.Hero
 import com.example.ktor.navigation.Screens
 import com.example.ktor.presentation.components.RatingWidget
+import com.example.ktor.presentation.components.ShimmerEffect
 import com.example.ktor.ui.theme.topAppContentColor
 import com.example.ktor.util.Constants.BASE_URL
+import com.example.ktor.util.Constants.DELAY
 import com.example.ktor.util.LARGE_PADDING
 import com.example.ktor.util.MEDIUM_PADDING
 import com.example.ktor.util.SMALL_PADDING
+import kotlinx.coroutines.delay
 
 @Composable
 fun ListContent(
     heroes: LazyPagingItems<Hero>,
     navHostController: NavHostController
 ) {
+    
+    val result = handlePagingResult(
+        heroes = heroes
+    )
+    
+    if (result) {
+        LazyColumn(
+            contentPadding = PaddingValues(SMALL_PADDING),
+            verticalArrangement = Arrangement.spacedBy(SMALL_PADDING)
+        ) {
+            items(
+                count = heroes.itemCount,
+                key = { index -> heroes[index]?.id ?: index }
+            ) { index ->
 
+                val hero = heroes[index]
 
-    LazyColumn(
-        contentPadding = PaddingValues(SMALL_PADDING),
-        verticalArrangement = Arrangement.spacedBy(SMALL_PADDING)
-    ) {
-        items(
-            count = heroes.itemCount,
-            key = { index -> heroes[index]?.id ?: index }
-        ) { index ->
-
-            val hero = heroes[index]
-
-            hero?.let { hero ->
-                HeroItem(
-                    hero = hero,
-                    navHostController = navHostController
-                )
+                hero?.let { hero ->
+                    HeroItem(
+                        hero = hero,
+                        navHostController = navHostController
+                    )
+                }
             }
-
-
         }
-
     }
 
+    
 
+
+}
+
+@Composable
+fun handlePagingResult(
+    heroes: LazyPagingItems<Hero>,
+): Boolean {
+
+    var minShimmerElapsed by remember { mutableStateOf(true) }
+
+    LaunchedEffect(heroes) {
+        snapshotFlow {
+            heroes.loadState.refresh
+        }.collect { state ->
+            if (state is LoadState.Loading) {
+                minShimmerElapsed = false
+                delay(DELAY)
+                minShimmerElapsed = true
+            }
+        }
+    }
+
+    val isLoading = heroes.loadState.refresh is LoadState.Loading
+
+    val error = when {
+        heroes.loadState.refresh is LoadState.Error -> {
+            heroes.loadState.refresh as LoadState.Error
+        }
+
+        heroes.loadState.prepend is LoadState.Error -> {
+            heroes.loadState.prepend as LoadState.Error
+        }
+
+        heroes.loadState.append is LoadState.Error -> {
+            heroes.loadState.append as LoadState.Error
+        }
+
+        else -> null
+    }
+
+    val showShimmer = (isLoading || error != null) && !minShimmerElapsed
+
+    return when {
+        showShimmer -> {
+            ShimmerEffect()
+            false
+        }
+
+        isLoading && minShimmerElapsed -> false
+
+        error != null -> false
+        
+        else -> true
+    }
+    
 }
 
 
