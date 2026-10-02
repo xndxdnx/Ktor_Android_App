@@ -10,6 +10,7 @@ import com.example.ktor.data.remote.KtorApi
 import com.example.ktor.domain.model.Hero
 import com.example.ktor.domain.model.HeroRemoteKey
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.minutes
 
 @OptIn(ExperimentalPagingApi::class)
 class HeroRemoteMediator @Inject constructor(
@@ -18,21 +19,30 @@ class HeroRemoteMediator @Inject constructor(
 ) : RemoteMediator<Int, Hero>() {
     private val heroDao = database.heroDao()
     private val heroRemoteKeysDao = database.heroRemoteKeyDao()
-    
-//    override suspend fun initialize(): InitializeAction {
-//        
-//        val currentTime = System.currentTimeMillis()
-//        val lastUpdater = heroRemoteKeysDao.getRemoteKey(1)?.lastUpdater
-//        return super.initialize()
-//    }
-    
+
+    override suspend fun initialize(): InitializeAction {
+
+        val currentTime = System.currentTimeMillis()
+        val lastUpdater = heroRemoteKeysDao.getRemoteKey(1)?.lastUpdater ?: 0L
+
+        val cacheTimeout = 1440
+        
+        val diffInMinutes = (currentTime - lastUpdater) / 1000 / 60
+        return if (diffInMinutes.toInt() <= cacheTimeout) {
+            InitializeAction.SKIP_INITIAL_REFRESH
+        }else {
+            InitializeAction.LAUNCH_INITIAL_REFRESH
+        }
+        
+    }
+
     override suspend fun load(
         loadType: LoadType,
         state: PagingState<Int, Hero>
     ): MediatorResult {
-        
+
         return try {
-            
+
             val page = when (loadType) {
                 LoadType.REFRESH -> {
                     val remoteKeys = getRemoteKeyClosestToCurrentPosition(state)
@@ -65,7 +75,7 @@ class HeroRemoteMediator @Inject constructor(
                         heroDao.deleteAllHeroes()
                         heroRemoteKeysDao.deleteAllRemoteKeys()
                     }
-                    
+
                     val prevPage = response.prefPage
                     val nextPage = response.nextPage
 
@@ -73,21 +83,22 @@ class HeroRemoteMediator @Inject constructor(
                         HeroRemoteKey(
                             prevPage = prevPage,
                             nextPage = nextPage,
-                            id = hero.id
+                            id = hero.id,
+                            lastUpdater = response.lastUpdater
                         )
                     }
-                    
+
                     heroDao.insertHeroes(heroesList = response.heroes)
                     heroRemoteKeysDao.addAllRemoteKeys(keys)
                 }
             }
-            
+
             MediatorResult.Success(endOfPaginationReached = response.nextPage == null)
-            
+
         } catch (e: Exception) {
             MediatorResult.Error(e)
         }
-        
+
     }
 
 

@@ -10,5 +10,5 @@ data class HeroRemoteKey(
     val nextPage: Int?,
     @PrimaryKey(autoGenerate = false)
     val id : Int,
-    //val lastUpdater: Long?
+    val lastUpdater: Long?
 )
