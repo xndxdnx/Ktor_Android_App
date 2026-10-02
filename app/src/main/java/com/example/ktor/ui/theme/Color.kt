@@ -18,6 +18,10 @@ val DarkGray = Color(0xFF2A2A2A)
 val StarColor = Color(0xFFFFC94D)
 
 
+val ShimmerLightGrey = Color(0xFFF1F1F1)
+val ShimmerMediumGrey = Color(0xFFE3E3E3)
+val ShimmerDarkGrey = Color(0xFF1D1D1D)
+
 
 @Composable
 fun activeIndicatorColor() : Color = if (isSystemInDarkTheme()) Purple40 else Purple80
@@ -45,3 +49,6 @@ fun topAppBarContentColor() : Color = if (isSystemInDarkTheme()) LightGray else 
 
 @Composable
 fun topAppContentColor() : Color = if (isSystemInDarkTheme()) LightGray else Color.White
+
+@Composable
+fun shimmerItemColor() : Color = if (isSystemInDarkTheme()) Color.Black else ShimmerLightGrey
