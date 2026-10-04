@@ -42,6 +42,8 @@ android {
 }
 
 dependencies {
+
+    implementation("androidx.compose.material:material:1.7.8")
     implementation(libs.ads.mobile.sdk)
     // KotlinX Serialization
 

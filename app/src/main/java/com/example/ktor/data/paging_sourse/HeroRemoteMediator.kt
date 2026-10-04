@@ -28,6 +28,7 @@ class HeroRemoteMediator @Inject constructor(
         val cacheTimeout = 1440
         
         val diffInMinutes = (currentTime - lastUpdater) / 1000 / 60
+        
         return if (diffInMinutes.toInt() <= cacheTimeout) {
             InitializeAction.SKIP_INITIAL_REFRESH
         }else {

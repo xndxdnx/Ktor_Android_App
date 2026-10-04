@@ -148,6 +148,7 @@ fun handlePagingResult(
 }
 
 
+
 @Composable
 fun HeroItem(
     hero: Hero,
