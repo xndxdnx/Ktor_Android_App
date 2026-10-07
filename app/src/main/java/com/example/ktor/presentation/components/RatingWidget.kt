@@ -38,7 +38,7 @@ fun RatingWidget(
     val starPathString = stringResource(R.string.star_path)
 
     val result = calculateStars(rating)
-    
+
     val starPath = remember {
         PathParser()
             .parsePathString(starPathString)
@@ -50,11 +50,11 @@ fun RatingWidget(
     }
 
     Row(
-        modifier= modifier,
+        modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(spaceBetween)
-    ) { 
+    ) {
         result["filledStars"]?.let {
-            repeat(it){
+            repeat(it) {
                 FilledStar(
                     starPath = starPath,
                     starPathBounds = starPathBounds,
@@ -63,7 +63,7 @@ fun RatingWidget(
             }
         }
         result["halfStars"]?.let {
-            repeat(it){
+            repeat(it) {
                 HalfFilledStar(
                     starPath = starPath,
                     starPathBounds = starPathBounds,
@@ -72,7 +72,7 @@ fun RatingWidget(
             }
         }
         result["emptyStars"]?.let {
-            repeat(it){
+            repeat(it) {
                 EmptyStar(
                     starPath = starPath,
                     starPathBounds = starPathBounds,
@@ -80,10 +80,9 @@ fun RatingWidget(
                 )
             }
         }
-        
+
     }
-    
-    
+
 
 }
 
@@ -91,44 +90,44 @@ fun RatingWidget(
 @Composable
 fun calculateStars(
     rating: Double,
-): Map<String, Int>{
-    
+): Map<String, Int> {
+
     val maxStars by remember { mutableStateOf(5) }
-    var filledStars by remember { mutableStateOf(0)  }
-    var halfStars by remember { mutableStateOf(0)  }
-    var emptyStars by remember { mutableStateOf(0)  }
+    var filledStars by remember { mutableStateOf(0) }
+    var halfStars by remember { mutableStateOf(0) }
+    var emptyStars by remember { mutableStateOf(0) }
 
     LaunchedEffect(rating) {
-        
-        val (firstNUmber, lastNumber ) = rating.toString().split(".").map { it.toInt() }
-        
-        if (firstNUmber in 0..5 && lastNumber in 0..9){
+
+        val (firstNUmber, lastNumber) = rating.toString().split(".").map { it.toInt() }
+
+        if (firstNUmber in 0..5 && lastNumber in 0..9) {
             filledStars = firstNUmber
-            if (lastNumber in 1..5){
-                halfStars ++
+            if (lastNumber in 1..5) {
+                halfStars++
             }
-            if (lastNumber in 6..9){
-                filledStars ++
+            if (lastNumber in 6..9) {
+                filledStars++
             }
-            if (firstNUmber == 5 && lastNumber > 0){
+            if (firstNUmber == 5 && lastNumber > 0) {
                 emptyStars = 5
                 filledStars = 0
                 halfStars = 0
             }
-        }else{
+        } else {
             Log.d("RatingWidget", "Invalid Rating Number")
         }
     }
-    
-    
+
+
     emptyStars = maxStars - (filledStars + halfStars)
-    
+
     return mapOf(
         "filledStars" to filledStars,
         "halfStars" to halfStars,
         "emptyStars" to emptyStars
     )
-    
+
 }
 
 @Composable
@@ -176,7 +175,7 @@ fun HalfFilledStar(
             .size(24.dp)
     ) {
         val canvasSize = this.size
-        
+
         scale(scaledFactor) {
             val pathWith = starPathBounds.width
             val pathHeight = starPathBounds.height
@@ -194,21 +193,23 @@ fun HalfFilledStar(
                 )
                 clipPath(
                     path = starPath
-                ){
-                }
+                ) {
                     drawRect(
-                        color = StarColor,
                         size = Size(
                             width = starPathBounds.maxDimension / 1.7f,
                             height = starPathBounds.maxDimension * scaledFactor
-                        )
+                        ),
+                        color = StarColor
                     )
-                
+
                 }
-                
+
+
             }
+
+        }
     }
-        
+
 }
 
 
@@ -218,7 +219,7 @@ fun FilledStar(
     starPathBounds: Rect,
     scaledFactor: Float = 2F
 ) {
-    
+
     Canvas(
         modifier = Modifier
             .size(24.dp)
@@ -250,6 +251,6 @@ fun FilledStar(
 @Preview
 fun FilledStarPreview() {
     RatingWidget(
-            rating = 1.0
+        rating = 1.0
     )
 }

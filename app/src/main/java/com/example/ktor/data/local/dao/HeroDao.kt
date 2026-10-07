@@ -21,5 +21,7 @@ interface HeroDao {
 
     @Query("DELETE FROM HERO_DATABASE_TABLE")
     suspend fun deleteAllHeroes()
-    
+
+    @Query("SELECT * FROM HERO_DATABASE_TABLE WHERE name LIKE :query ORDER BY id ASC")
+    fun searchHeroes(query: String) : PagingSource<Int, Hero>
 }

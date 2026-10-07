@@ -1,6 +1,7 @@
 package com.example.ktor.data.repository
 
 import androidx.paging.PagingData
+import androidx.room.RawQuery
 import com.example.ktor.domain.model.Hero
 import com.example.ktor.domain.repository.DatastoreOperations
 import com.example.ktor.domain.repository.RemoteDataSource
@@ -20,6 +21,9 @@ class Repository @Inject constructor(
     }
     
     fun getAllHeroes() : Flow<PagingData<Hero>> = remoteDataSource.getAllHeroes()
+    
+    fun searchHeroes(query: String) : Flow<PagingData<Hero>> = remoteDataSource.searchHeroes(query = query)
+    
     
     
 }
