@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.example.ktor.navigation.Screens
 import com.example.ktor.presentation.screens.home.components.ListContent
 
 @Composable
@@ -27,7 +28,9 @@ fun HomeScreen (
     Scaffold(
         modifier = Modifier
             .systemBarsPadding(),
-        topBar = {HomeTopBar()},
+        topBar = {HomeTopBar(
+            onSearchClicked = {navHostController.navigate(Screens.SearchScreen.route)}
+        )},
         content = {paddingValues ->
             Box(
                 modifier = Modifier

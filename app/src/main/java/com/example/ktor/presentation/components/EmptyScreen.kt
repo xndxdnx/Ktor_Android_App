@@ -63,14 +63,8 @@ fun EmptyScreen(
         icon = icon,
         alphaAnim = alphaAnim
     )
-
-
+    
 }
-
-
-
-
-
 
 @Composable
 fun EmptyContent(

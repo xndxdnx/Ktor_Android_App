@@ -52,3 +52,9 @@ fun topAppContentColor() : Color = if (isSystemInDarkTheme()) LightGray else Col
 
 @Composable
 fun shimmerItemColor() : Color = if (isSystemInDarkTheme()) Color.Black else ShimmerLightGrey
+
+@Composable
+fun searchWidgetBackgroundColor() : Color = if (isSystemInDarkTheme()) Color.Black else Purple40
+
+@Composable
+fun searchWidgetContentColor() : Color = if (isSystemInDarkTheme()) LightGray else Color.White

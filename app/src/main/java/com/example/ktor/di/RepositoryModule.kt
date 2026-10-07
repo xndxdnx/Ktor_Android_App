@@ -8,6 +8,7 @@ import com.example.ktor.domain.usecase.UseCases
 import com.example.ktor.domain.usecase.get_all_heroes.GetAllHeroesUseCase
 import com.example.ktor.domain.usecase.read_onboarding.ReadOnboardingUseCase
 import com.example.ktor.domain.usecase.save_onboarding.SaveOnboardingUseCase
+import com.example.ktor.domain.usecase.search_heroes.SearchHeroesUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -33,7 +34,8 @@ object RepositoryModule {
         return UseCases(
             readOnboardingUseCase = ReadOnboardingUseCase(repository),
             saveOnboardingUseCase = SaveOnboardingUseCase(repository),
-            getAllHeroesUseCase = GetAllHeroesUseCase(repository)
+            getAllHeroesUseCase = GetAllHeroesUseCase(repository),
+            searchHeroesUseCase = SearchHeroesUseCase(repository)
         )
     }
     
