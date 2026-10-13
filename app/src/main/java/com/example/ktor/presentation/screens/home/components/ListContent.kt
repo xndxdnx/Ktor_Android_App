@@ -46,6 +46,7 @@ import coil.request.ImageRequest
 import com.example.ktor.R
 import com.example.ktor.domain.model.Hero
 import com.example.ktor.navigation.Screens
+import com.example.ktor.presentation.components.EmptyScreen
 import com.example.ktor.presentation.components.RatingWidget
 import com.example.ktor.presentation.components.ShimmerEffect
 import com.example.ktor.ui.theme.topAppContentColor
@@ -140,7 +141,10 @@ fun handlePagingResult(
 
         isLoading && minShimmerElapsed -> false
 
-        error != null -> false
+        error != null -> {
+            EmptyScreen(error = error)
+            false
+        }
         
         else -> true
     }
