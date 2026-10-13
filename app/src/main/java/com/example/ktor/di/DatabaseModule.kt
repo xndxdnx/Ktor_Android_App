@@ -4,6 +4,11 @@ import android.content.Context
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.ktor.data.database.HeroDatabase
+import com.example.ktor.data.remote.KtorApi
+import com.example.ktor.data.repository.LocalDataSourceImpl
+import com.example.ktor.data.repository.RemoteDataSourceImpl
+import com.example.ktor.domain.repository.LocalDataSource
+import com.example.ktor.domain.repository.RemoteDataSource
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -23,5 +28,10 @@ object DatabaseModule {
         name = "table"
     ).build()
 
+    @Provides
+    @Singleton
+    fun provideLocalDatasource(database: HeroDatabase) :  LocalDataSource {
+        return LocalDataSourceImpl(database)
+    }
 
 }

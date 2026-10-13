@@ -4,13 +4,16 @@ import androidx.paging.PagingData
 import androidx.room.RawQuery
 import com.example.ktor.domain.model.Hero
 import com.example.ktor.domain.repository.DatastoreOperations
+import com.example.ktor.domain.repository.LocalDataSource
 import com.example.ktor.domain.repository.RemoteDataSource
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class Repository @Inject constructor(
     private val datastoreOperations: DatastoreOperations ,
-    private val remoteDataSource: RemoteDataSource
+    private val remoteDataSource: RemoteDataSource,
+    private val localDataSource: LocalDataSource
+    
 ) {
     suspend fun saveOnboardingState(completed: Boolean) {
         datastoreOperations.saveOnboardingState(completed)
@@ -22,8 +25,8 @@ class Repository @Inject constructor(
     
     fun getAllHeroes() : Flow<PagingData<Hero>> = remoteDataSource.getAllHeroes()
     
+    suspend fun getSelectedHero(id: Int) : Hero = localDataSource.getSelectedHero(id)
+    
     fun searchHeroes(query: String) : Flow<PagingData<Hero>> = remoteDataSource.searchHeroes(query = query)
-    
-    
     
 }

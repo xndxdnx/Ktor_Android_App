@@ -6,6 +6,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.ktor.presentation.screens.details.DetailsScreen
 import com.example.ktor.presentation.screens.home.HomeScreen
 import com.example.ktor.presentation.screens.search.SearchScreen
 import com.example.ktor.presentation.screens.splash.SplashScreen
@@ -19,7 +20,7 @@ fun NavGraph(
 
     NavHost(
         navController = navHostController,
-        startDestination = Screens.SplashScreen.route
+        startDestination = Screens.DetailsScreen.route
     ) {
         
         composable (Screens.SplashScreen.route) {
@@ -38,7 +39,9 @@ fun NavGraph(
             arguments = listOf(navArgument(DETAILS_ARGUMENT_KEY){
                 type = NavType.IntType
             })
-        ) { }
+        ) {
+            DetailsScreen(navHostController = navHostController)
+        }
         composable (Screens.WelcomeScreen.route) { WelcomeScreen(navHostController) }
         
         
