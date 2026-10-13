@@ -42,13 +42,18 @@ android {
 }
 
 dependencies {
+
+    implementation("androidx.compose.material:material:1.7.8")
+    implementation(libs.ads.mobile.sdk)
     // KotlinX Serialization
-    
+
+    implementation(libs.androidx.datastore)
+    implementation(libs.androidx.palette.ktx)
+
     implementation(libs.kotlinx.serialization.json)
-
-
     implementation(libs.androidx.paging.compose)
-
+    implementation(libs.room.paging)
+    
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
@@ -68,6 +73,8 @@ dependencies {
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
 
+
+    implementation(libs.retrofit2.kotlinx.serialization.converter)
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.gson)
     implementation(libs.okhttp)

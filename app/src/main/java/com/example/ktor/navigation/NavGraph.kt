@@ -1,0 +1,51 @@
+package com.example.ktor.navigation
+
+import androidx.compose.runtime.Composable
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
+import com.example.ktor.presentation.screens.details.DetailsScreen
+import com.example.ktor.presentation.screens.home.HomeScreen
+import com.example.ktor.presentation.screens.search.SearchScreen
+import com.example.ktor.presentation.screens.splash.SplashScreen
+import com.example.ktor.presentation.screens.welcome.WelcomeScreen
+import com.example.ktor.util.Constants.DETAILS_ARGUMENT_KEY
+
+@Composable
+fun NavGraph(
+    navHostController: NavHostController
+) {
+
+    NavHost(
+        navController = navHostController,
+        startDestination = Screens.DetailsScreen.route
+    ) {
+        
+        composable (Screens.SplashScreen.route) {
+            SplashScreen(navHostController = navHostController)
+        }
+        composable (Screens.HomeScreen.route) { HomeScreen(
+            navHostController = navHostController
+        ) }
+        composable (Screens.SearchScreen.route) { 
+            SearchScreen(
+                navHostController = navHostController
+            ) 
+        }
+        composable (
+            route = Screens.DetailsScreen.route,
+            arguments = listOf(navArgument(DETAILS_ARGUMENT_KEY){
+                type = NavType.IntType
+            })
+        ) {
+            DetailsScreen(navHostController = navHostController)
+        }
+        composable (Screens.WelcomeScreen.route) { WelcomeScreen(navHostController) }
+        
+        
+    }
+
+
+}
