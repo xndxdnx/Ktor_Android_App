@@ -3,6 +3,7 @@ package com.example.ktor.data.repository
 import androidx.paging.PagingData
 import androidx.room.RawQuery
 import com.example.ktor.domain.model.Hero
+import com.example.ktor.domain.model.HeroCreateRequest
 import com.example.ktor.domain.repository.DatastoreOperations
 import com.example.ktor.domain.repository.LocalDataSource
 import com.example.ktor.domain.repository.RemoteDataSource
@@ -28,5 +29,11 @@ class Repository @Inject constructor(
     suspend fun getSelectedHero(id: Int) : Hero = localDataSource.getSelectedHero(id)
     
     fun searchHeroes(query: String) : Flow<PagingData<Hero>> = remoteDataSource.searchHeroes(query = query)
+    
+    suspend fun createHero(
+        request: HeroCreateRequest,
+        imageBytes: ByteArray,
+        filename: String
+    ): Hero  = remoteDataSource.createHero(request,imageBytes, filename)
     
 }
