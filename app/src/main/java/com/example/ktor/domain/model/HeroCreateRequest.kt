@@ -5,7 +5,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class HeroCreateRequest (
     val name: String,
-    val image: String,
     val about: String,
     val rating: Double,
     val power: Int,
