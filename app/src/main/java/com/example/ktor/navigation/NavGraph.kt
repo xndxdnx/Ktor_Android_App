@@ -6,6 +6,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.ktor.presentation.screens.create_hero_screen.CreateHeroScreen
 import com.example.ktor.presentation.screens.details.DetailsScreen
 import com.example.ktor.presentation.screens.home.HomeScreen
 import com.example.ktor.presentation.screens.search.SearchScreen
@@ -22,6 +23,8 @@ fun NavGraph(
         navController = navHostController,
         startDestination = Screens.HomeScreen.route
     ) {
+        
+        composable(Screens.CreateHeroScreen.route) { CreateHeroScreen(navHostController = navHostController) }
         
         composable (Screens.SplashScreen.route) {
             SplashScreen(navHostController = navHostController)
