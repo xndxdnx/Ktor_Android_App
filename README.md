@@ -14,6 +14,8 @@ Android-приложение с информацией о персонажах �
   <img src="screenshots/create_hero.jpg" width="250" />
 </p>
 
+Репозиторий серверной части: https://github.com/xndxdnx/ktor-server
+
 ## Возможности
 
 - Просмотр списка персонажей с постраничной загрузкой

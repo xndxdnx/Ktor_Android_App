@@ -6,6 +6,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -21,11 +25,19 @@ fun HomeScreen (
     viewModel: HomeScreenViewModel = hiltViewModel(),
     navHostController: NavHostController
 ){
-    
     val allHeroes = viewModel.getAllHeroes().collectAsLazyPagingItems()
     
-    
     Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {navHostController.navigate(Screens.CreateHeroScreen.route)}
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = null
+                )
+            }
+        },
         modifier = Modifier
             .systemBarsPadding(),
         topBar = {HomeTopBar(

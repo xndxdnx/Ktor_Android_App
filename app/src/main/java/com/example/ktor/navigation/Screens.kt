@@ -12,5 +12,5 @@ sealed class Screens (
         }
     }
     object WelcomeScreen : Screens(route = "welcome_screen")
-    
+    object CreateHeroScreen : Screens(route = "create_hero_screen")
 }
