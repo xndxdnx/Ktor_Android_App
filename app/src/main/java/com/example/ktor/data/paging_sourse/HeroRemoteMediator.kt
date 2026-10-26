@@ -1,5 +1,7 @@
 package com.example.ktor.data.paging_sourse
 
+import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
@@ -9,6 +11,7 @@ import com.example.ktor.data.database.HeroDatabase
 import com.example.ktor.data.remote.KtorApi
 import com.example.ktor.domain.model.Hero
 import com.example.ktor.domain.model.HeroRemoteKey
+import retrofit2.HttpException
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.minutes
 
@@ -22,19 +25,30 @@ class HeroRemoteMediator @Inject constructor(
 
     override suspend fun initialize(): InitializeAction {
 
-        val currentTime = System.currentTimeMillis()
-        val lastUpdater = heroRemoteKeysDao.getRemoteKey(1)?.lastUpdater ?: 0L
+//        val currentTime = System.currentTimeMillis()
+//        val lastUpdater = heroRemoteKeysDao.getRemoteKey(1)?.lastUpdater ?: 0L
+//
+//        val cacheTimeout = 1440
+//        
+//        val diffInMinutes = (currentTime - lastUpdater) / 1000 / 60
+//        
+//        return if (diffInMinutes.toInt() <= cacheTimeout) {
+//            InitializeAction.SKIP_INITIAL_REFRESH
+//        }else {
+//            InitializeAction.LAUNCH_INITIAL_REFRESH
+//        }
 
-        val cacheTimeout = 1440
-        
-        val diffInMinutes = (currentTime - lastUpdater) / 1000 / 60
-        
-        return if (diffInMinutes.toInt() <= cacheTimeout) {
-            InitializeAction.SKIP_INITIAL_REFRESH
-        }else {
-            InitializeAction.LAUNCH_INITIAL_REFRESH
+        val heroCount = heroDao.getHeroCount()
+        val heroLastRemoteKey = heroRemoteKeysDao.getLastRemoteKey()
+
+        val cacheIsComplete = heroCount > 0 && heroLastRemoteKey?.nextPage == null
+
+        if (!cacheIsComplete) {
+            Log.d("RemoteMediator", "REFRESH! (cache empty or incomplete)")
+            return InitializeAction.LAUNCH_INITIAL_REFRESH
         }
-        
+        Log.d("RemoteMediator", "SKIP refresh, local list is complete ($heroCount heroes)")
+        return InitializeAction.SKIP_INITIAL_REFRESH
     }
 
     override suspend fun load(
@@ -42,18 +56,21 @@ class HeroRemoteMediator @Inject constructor(
         state: PagingState<Int, Hero>
     ): MediatorResult {
 
+        if (loadType == LoadType.REFRESH) {
+            return loadPages()
+        }
+        
         return try {
-
             val page = when (loadType) {
                 LoadType.REFRESH -> {
-                    val remoteKeys = getRemoteKeyClosestToCurrentPosition(state)
-                    remoteKeys?.nextPage?.minus(1) ?: 1
+                    1
                 }
 
                 LoadType.APPEND -> {
-                    val remoteKeys = getRemoteKeyForLastItem(state)
+                    val remoteKeys =
+                        getRemoteKeyForLastItem(state) ?: heroRemoteKeysDao.getLastRemoteKey()
                     val nextPage = remoteKeys?.nextPage ?: return MediatorResult.Success(
-                        endOfPaginationReached = remoteKeys != null
+                        endOfPaginationReached = true
                     )
                     nextPage
                 }
@@ -69,6 +86,20 @@ class HeroRemoteMediator @Inject constructor(
             }
 
             val response = api.getAllHeroes(page)
+
+
+            if (!response.success) {
+
+                if (loadType == LoadType.APPEND) {
+                    return MediatorResult.Success(endOfPaginationReached = true)
+                }
+                return MediatorResult.Error(
+                    IllegalStateException(
+                        response.message?: "Failed to load heroes"
+                    )
+                )
+            }
+
 
             if (response.heroes.isNotEmpty()) {
                 database.withTransaction {
@@ -98,6 +129,16 @@ class HeroRemoteMediator @Inject constructor(
 
         } catch (e: Exception) {
             MediatorResult.Error(e)
+        }catch (e: HttpException) {
+            
+            if (e.code() == 404 && loadType == LoadType.APPEND) {
+                return MediatorResult.Success(endOfPaginationReached = true)
+            }
+            Log.e("RemoteMediator", "HTTP ${e.code()} while loading page", e)
+            return MediatorResult.Error(e)
+        } catch (e: Exception) {
+            Log.e("RemoteMediator", "Failed to load heroes", e)
+            return MediatorResult.Error(e)
         }
 
     }
@@ -126,6 +167,59 @@ class HeroRemoteMediator @Inject constructor(
             ?.let { hero ->
                 heroRemoteKeysDao.getRemoteKey(hero.id)
             }
+    }
+    
+    private suspend fun loadPages() : MediatorResult {
+       return try {
+            var page = 1
+            
+            val heroes = mutableListOf<Hero>()
+            
+            val keys = mutableListOf<HeroRemoteKey>()
+            
+            while (page in 1..50) {
+                val response = api.getAllHeroes(page)
+                
+                if (!response.success || response.heroes.isEmpty()) {
+                    break
+                }
+                
+                heroes+=response.heroes
+                
+                keys += response.heroes.map { hero ->
+                    HeroRemoteKey(
+                        prevPage = response.prefPage,
+                        nextPage = response.nextPage,
+                        id = hero.id,
+                        lastUpdater = response.lastUpdater
+                    )
+                }
+                val next = response.nextPage ?: break
+                page = next
+                
+                database.withTransaction { 
+                    heroDao.deleteAllHeroes()
+                    heroRemoteKeysDao.deleteAllRemoteKeys()
+                    
+                    if (heroes.isNotEmpty()){
+                        heroRemoteKeysDao.addAllRemoteKeys(keys)
+                        heroDao.insertHeroes(heroes)
+                    }
+                    
+                    
+                }
+                
+            }
+
+            MediatorResult.Success(true)
+            
+        }catch (e: Exception) {
+            Log.e("RemoteMediator", "Failed to load full hero list", e)
+            MediatorResult.Error(e)
+        }
+        
+        
+        
     }
 
 }
