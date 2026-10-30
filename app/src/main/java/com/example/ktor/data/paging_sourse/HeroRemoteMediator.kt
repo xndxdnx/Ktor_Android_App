@@ -205,10 +205,7 @@ class HeroRemoteMediator @Inject constructor(
                         heroRemoteKeysDao.addAllRemoteKeys(keys)
                         heroDao.insertHeroes(heroes)
                     }
-                    
-                    
                 }
-                
             }
 
             MediatorResult.Success(true)
