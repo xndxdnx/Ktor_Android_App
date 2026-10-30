@@ -19,4 +19,7 @@ interface HeroRemoteKeyDao {
     @Query("SELECT * FROM HERO_REMOTE_KEY_TABLE WHERE id =:id")
     suspend fun getRemoteKey(id: Int) : HeroRemoteKey?
     
+    @Query("SELECT * FROM HERO_REMOTE_KEY_TABLE ORDER BY id DESC LIMIT 1")
+    suspend fun getLastRemoteKey() : HeroRemoteKey?
+    
 }

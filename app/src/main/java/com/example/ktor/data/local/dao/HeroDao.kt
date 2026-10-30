@@ -18,10 +18,15 @@ interface HeroDao {
     
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertHeroes(heroesList: List<Hero>)
-
+    
     @Query("DELETE FROM HERO_DATABASE_TABLE")
     suspend fun deleteAllHeroes()
 
     @Query("SELECT * FROM HERO_DATABASE_TABLE WHERE name LIKE :query ORDER BY id ASC")
     fun searchHeroes(query: String) : PagingSource<Int, Hero>
+    
+    @Query("SELECT COUNT(*) FROM HERO_DATABASE_TABLE")
+    suspend fun getHeroCount() : Int 
+    
+    
 }
