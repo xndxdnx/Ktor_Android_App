@@ -62,7 +62,7 @@ fun DetailsScreen(
 
     if (selectedHero != null && colorPalette.value.isNotEmpty()) {
         DetailsContent(
-            navHostController = navHostController,
+            navController = navHostController,
             selectedHero = selectedHero,
             colors = colorPalette.value
         )

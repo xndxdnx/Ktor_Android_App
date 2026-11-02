@@ -38,7 +38,7 @@ class CreateHeroE2ETest {
                 natureTypes = listOf("QA")
             )
         )
-
+        
         val multipart = MultipartBody.Builder()
             .setType(MultipartBody.FORM)
             .addPart(

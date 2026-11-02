@@ -3,6 +3,7 @@ package com.example.ktor.util
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
+import androidx.core.graphics.red
 import androidx.palette.graphics.Palette
 import coil.ImageLoader
 import coil.request.ImageRequest
@@ -41,22 +42,18 @@ object PaletteGenerator {
             )
         )
     }
-
-    private fun parseColorSwatch(color: Palette.Swatch?): String {
-        return if (color != null) {
-            val parsedColor = Integer.toHexString(color.rgb)
-            "#$parsedColor"
-        } else {
-            "#000000"
-        }
+    
+    private fun toHexColor(color: Int?) : String {
+        return String.format("#%08X", color)
     }
 
+
+    private fun parseColorSwatch(color: Palette.Swatch?): String {
+        return color?.rgb.let(::toHexColor) ?: "#000000"
+    }
+    
+   
     private fun parseBodyColor(color: Int?): String {
-        return if (color != null) {
-            val parsedColor = Integer.toHexString(color)
-            "#$parsedColor"
-        } else {
-            "#FFFFFF"
-        }
+        return color?.let(::toHexColor) ?: "#FFFFFF"
     }
 }

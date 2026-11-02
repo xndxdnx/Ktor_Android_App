@@ -43,7 +43,6 @@ class CreateHeroViewModel @Inject constructor(
             errorMessage.value = null
 
             try {
-
                 val request = HeroCreateRequest(
                     name = name.trim(),
                     about = about.trim(),

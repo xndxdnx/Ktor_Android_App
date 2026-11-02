@@ -19,4 +19,7 @@ interface RemoteDataSource{
         imageBytes: ByteArray,
         filename: String
     ) : Hero
+    
+    suspend fun updateHeroRating(heroId: Int, rating: Int) : Hero
+    
 }

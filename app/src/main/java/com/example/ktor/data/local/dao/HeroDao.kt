@@ -28,5 +28,7 @@ interface HeroDao {
     @Query("SELECT COUNT(*) FROM HERO_DATABASE_TABLE")
     suspend fun getHeroCount() : Int 
     
-    
+    @Query("UPDATE HERO_DATABASE_TABLE SET rating = :rating WHERE id = :heroId")
+    suspend fun updateHeroRating(rating: Double, heroId: Int)
+
 }

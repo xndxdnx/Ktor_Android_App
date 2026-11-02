@@ -10,4 +10,14 @@ class LocalDataSourceImpl(
     override suspend fun getSelectedHero(id: Int): Hero {
         return database.heroDao().getSelectedHero(id)
     }
+
+    override suspend fun updateHeroRating(
+        heroId: Int,
+        rating: Double
+    ) {
+        return database.heroDao().updateHeroRating(
+            heroId = heroId,
+            rating = rating
+        )
+    }
 }
