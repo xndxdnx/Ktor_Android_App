@@ -36,4 +36,8 @@ class Repository @Inject constructor(
         filename: String
     ): Hero  = remoteDataSource.createHero(request,imageBytes, filename)
     
+    
+    suspend fun updateHeroRating(rating: Int, heroId: Int) : Hero {
+        return remoteDataSource.updateHeroRating(rating = rating, heroId = heroId)
+    }
 }

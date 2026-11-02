@@ -3,7 +3,14 @@ package com.example.ktor.presentation.screens.details.components
 import android.app.Activity
 import android.graphics.Color.parseColor
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.exponentialDecay
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.AnchoredDraggableState
+import androidx.compose.foundation.gestures.DraggableAnchors
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,83 +21,74 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.BottomSheetScaffoldState
-import androidx.compose.material.BottomSheetValue
 import androidx.compose.material.ContentAlpha
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.rememberBottomSheetScaffoldState
-import androidx.compose.material.rememberBottomSheetState
-import androidx.compose.material.BottomSheetScaffold
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import coil.annotation.ExperimentalCoilApi
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.ktor.R
 import com.example.ktor.domain.model.Hero
 import com.example.ktor.ui.theme.applyDefaultSystemBars
-import com.example.ktor.ui.theme.welcomeScreenTitleColor
+import com.example.ktor.util.Constants.ABOUT_TEXT_MAX_LINES
 import com.example.ktor.util.Constants.BASE_URL
+import com.example.ktor.util.Constants.EXPANDED_RADIUS_LEVEL
+import com.example.ktor.util.Constants.INFO_ICON_SIZE
 import com.example.ktor.util.Constants.MIN_BACKGROUND_IMAGE_HEIGHT
 import com.example.ktor.util.EXTRA_LARGE_PADDING
 import com.example.ktor.util.LARGE_PADDING
 import com.example.ktor.util.MEDIUM_PADDING
 import com.example.ktor.util.SMALL_PADDING
+import kotlin.math.roundToInt
 
-@OptIn(ExperimentalMaterialApi::class)
-val BottomSheetScaffoldState.currentSheetFractions : Float
-    get() {
-        val fraction = bottomSheetState.progress
-        val targetValue = bottomSheetState.targetValue
-        
-        val currentValue = bottomSheetState.currentValue
-        
-        return  when  {
-            currentValue == BottomSheetValue.Collapsed && targetValue == BottomSheetValue.Collapsed -> 1F
-            currentValue == BottomSheetValue.Expanded && targetValue == BottomSheetValue.Expanded -> 0F
-            currentValue == BottomSheetValue.Collapsed && targetValue == BottomSheetValue.Expanded -> 1F - fraction
-            currentValue == BottomSheetValue.Expanded && targetValue == BottomSheetValue.Collapsed -> 0F + fraction
-            else -> fraction
-        }
-    }
+private enum class SheetAnchor {
+    Bottom,
+    Middle,
+    Top
+}
 
-
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DetailsContent(
-    navHostController: NavHostController,
+    navController: NavHostController,
     selectedHero: Hero?,
-    colors: Map<String, String>
+    colors: Map<String, String>,
 ) {
     val activity = LocalContext.current as Activity
-    
     val darkTheme = isSystemInDarkTheme()
 
     val vibrant = colors["vibrant"]!!
@@ -101,138 +99,145 @@ fun DetailsContent(
 
     DisposableEffect(darkVibrant, darkTheme) {
         val window = activity.window
-        val insetsController =
-            WindowCompat.getInsetsController(window, window.decorView)
-
+        val insetsController = WindowCompat.getInsetsController(window, window.decorView)
         window.statusBarColor = sheetColor.toArgb()
         window.navigationBarColor = sheetColor.toArgb()
-
         insetsController.isAppearanceLightStatusBars = false
         insetsController.isAppearanceLightNavigationBars = false
 
-        
         onDispose {
-            applyDefaultSystemBars(
-                activity = activity,
-                darkTheme = darkTheme
-            )
+            applyDefaultSystemBars(activity = activity, darkTheme = darkTheme)
         }
     }
-    
-    val scaffoldState = rememberBottomSheetScaffoldState(
-        bottomSheetState = rememberBottomSheetState(initialValue = BottomSheetValue.Collapsed)
-    )
-    
-    val currentSheetFraction = scaffoldState.currentSheetFractions
-    
-    val radiusAnim by animateDpAsState(
-        targetValue = if (currentSheetFraction == 1F) EXTRA_LARGE_PADDING else 0.dp,
-        label = "radius_animation"
-    )
 
-
-    BottomSheetScaffold(
-        modifier = Modifier 
-            .fillMaxSize(),
-        backgroundColor = sheetColor,
-        sheetBackgroundColor = sheetColor,
-        sheetShape = RoundedCornerShape(topStart = radiusAnim.value, topEnd = radiusAnim.value),
-        scaffoldState = scaffoldState,
-        sheetPeekHeight = 140.dp,
-        sheetContent = {
-            selectedHero?.let {hero ->
-                BottomSheetContent(
-                    selectedHero = hero,
-                    sheetBackgroundColor = Color(parseColor(darkVibrant)),
-                    infoBoxIconColor = Color(parseColor(vibrant)),
-                    contentColor = Color(parseColor(onDarkVibrant)),
-                )
-            }
-            
-        },
-        content = {
-            selectedHero?.let {hero ->
-                BackgroundContent(
-                    heroImage = hero.image,
-                    imageFraction = currentSheetFraction,
-                    backgroundColor = Color(parseColor(onDarkVibrant)),
-                    onCloseClick = { navHostController.popBackStack() }
-                )
-            }
+    val density = LocalDensity.current
+    
+    var layoutHeight by remember { mutableStateOf(0) }
+    
+    val sheetState = remember {
+        AnchoredDraggableState(
+            initialValue = SheetAnchor.Bottom,
+            positionalThreshold = { distance: Float -> distance * 0.5f },
+            velocityThreshold = { with(density) { 125.dp.toPx() } },
+            snapAnimationSpec = tween(durationMillis = 300),
+            decayAnimationSpec = exponentialDecay()
+        )
+    }
+    val peekPx = with(density) {140.dp.toPx() }
+    
+    if (layoutHeight > 0) {
+        val anchors = DraggableAnchors {
+            SheetAnchor.Bottom at (layoutHeight - peekPx)
+            SheetAnchor.Middle at layoutHeight * 0.46f
+            SheetAnchor.Top at 0f
         }
+        SideEffect {
+            sheetState.updateAnchors(anchors)
+        }
+    }
+
+    val sheetOffset = sheetState.offset
+    val middleOffset = layoutHeight * 0.46f
+    val progressToTop = if (sheetOffset.isNaN() || middleOffset == 0f) {
+        0f
+    } else {
+        ((middleOffset - sheetOffset) / middleOffset).coerceIn(0f, 1f)
+    }
+    val radiusAnim by animateDpAsState(
+        targetValue = EXTRA_LARGE_PADDING * (1f - progressToTop) + EXPANDED_RADIUS_LEVEL * progressToTop,
+        label = "Radius Animation"
     )
-    
-    
-
-}
-
-@Composable
-fun BackgroundContent(
-    heroImage: String,
-    imageFraction: Float = 1F,
-    backgroundColor: Color = MaterialTheme.colorScheme.surface,
-    onCloseClick: () -> Unit = {}
-) {
-
-    val imageUrl = remember { "$BASE_URL$heroImage" }
+    val imageFraction = 1f - progressToTop
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = backgroundColor),
-
-        ) {
-        AsyncImage(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(
-                    fraction = (imageFraction + MIN_BACKGROUND_IMAGE_HEIGHT)
-                        // ограничивает итоговое значение максимально 
-                        .coerceAtMost(maximumValue = 1.0F)
-                )
-                .align(Alignment.TopCenter),
-            model = ImageRequest.Builder(context = LocalContext.current)
-                .data(imageUrl)
-                .error(drawableResId = R.drawable.ic_placeholder)
-                .build(),
-            contentDescription = null,
-            contentScale = ContentScale.Crop
-        )
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .statusBarsPadding(),
-            horizontalArrangement = Arrangement.End
-        ) {
-            IconButton(
-                onClick = onCloseClick,
+            .onSizeChanged { layoutHeight = it.height }
+            .background(sheetColor)
+    ) {
+        selectedHero?.let { hero ->
+            BackgroundContent(
+                heroImage = hero.image,
+                imageFraction = imageFraction,
+                backgroundColor = sheetColor
+            )
+        }
+        if (layoutHeight > 0) {
+            Column(
                 modifier = Modifier
-                    .padding(SMALL_PADDING)
+                    .fillMaxSize()
+                    .offset {
+                        val y = if (sheetOffset.isNaN()) {
+                            (layoutHeight - peekPx).roundToInt()
+                        } else {
+                            sheetOffset.roundToInt()
+                        }
+                        IntOffset(x = 0, y = y)
+                    }
+                    .anchoredDraggable(
+                        state = sheetState,
+                        orientation = Orientation.Vertical
+                    )
+                    .clip(
+                        RoundedCornerShape(
+                            topStart = radiusAnim,
+                            topEnd = radiusAnim
+                        )
+                    )
+                    .background(sheetColor)
             ) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = null,
-                    tint = Color.White
+                Box(
+                    modifier = Modifier
+                        .padding(top = 12.dp)
+                        .size(width = 48.dp, height = 4.dp)
+                        .clip(RoundedCornerShape(2.dp))
+                        .background(Color.White.copy(alpha = 0.45f))
+                        .align(Alignment.CenterHorizontally)
                 )
+                selectedHero?.let {
+                    BottomSheetContent(
+                        selectedHero = it,
+                        infoBoxIconColor = Color(parseColor(vibrant)),
+                        sheetBackgroundColor = Color(parseColor(darkVibrant)),
+                        contentColor = Color(parseColor(onDarkVibrant))
+                    )
+                }
             }
+        }
+        IconButton(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .statusBarsPadding()
+                .padding(all = SMALL_PADDING)
+                .size(44.dp)
+                .clip(CircleShape)
+                .background(Color.Black.copy(alpha = 0.45f)),
+            onClick = { navController.popBackStack() }
+        ) {
+            Icon(
+                modifier = Modifier.size(22.dp),
+                imageVector = Icons.Default.Close,
+                contentDescription =null,
+                tint = Color.White
+            )
         }
     }
 }
 
 @Composable
 fun BottomSheetContent(
+    selectedHero: Hero,
     infoBoxIconColor: Color = MaterialTheme.colorScheme.primary,
     sheetBackgroundColor: Color = MaterialTheme.colorScheme.surface,
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
-    selectedHero: Hero
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(color = sheetBackgroundColor)
-            .padding(LARGE_PADDING)
+            .background(sheetBackgroundColor)
+            .padding(all = LARGE_PADDING)
     ) {
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -240,24 +245,22 @@ fun BottomSheetContent(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                painter = painterResource(R.drawable.icon_logo),
-                contentDescription = null,
-                tint = contentColor,
                 modifier = Modifier
                     .padding(end = SMALL_PADDING)
-                    .size(32.dp)
+                    .size(INFO_ICON_SIZE),
+                painter = painterResource(id = R.drawable.icon_logo),
+                contentDescription = null,
+                tint = contentColor
             )
             Text(
+                modifier = Modifier
+                    .weight(1f),
                 text = selectedHero.name,
                 color = contentColor,
-                fontWeight = FontWeight.Bold,
-                fontSize = 24.sp,
-                modifier = Modifier
-                    .weight(1f)
+                fontSize = MaterialTheme.typography.headlineSmall.fontSize,
+                fontWeight = FontWeight.Bold
             )
-
         }
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -265,176 +268,201 @@ fun BottomSheetContent(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             InfoBox(
-                icon = painterResource(R.drawable.icon_bolt2),
+                icon = painterResource(id = R.drawable.icon_bolt2),
                 iconColor = infoBoxIconColor,
-                title = "${selectedHero.power}",
-                description = "Power",
+                bigText = "${selectedHero.power}",
+                smallText = "power",
                 textColor = contentColor
             )
             InfoBox(
-                icon = painterResource(R.drawable.icon_calendar),
+                icon = painterResource(id = R.drawable.icon_calendar),
                 iconColor = infoBoxIconColor,
-                title = "${selectedHero.month}",
-                description = "Month",
+                bigText = selectedHero.month,
+                smallText = "month",
                 textColor = contentColor
             )
             InfoBox(
-                icon = painterResource(R.drawable.icon_cake),
+                icon = painterResource(id = R.drawable.icon_cake),
                 iconColor = infoBoxIconColor,
-                title = "${selectedHero.day}",
-                description = "Birthday",
+                bigText = selectedHero.day,
+                smallText = "birthday",
                 textColor = contentColor
             )
         }
-
-        Spacer(Modifier.height(16.dp))
-
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
         Text(
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             text = "About",
             color = contentColor,
-            fontWeight = FontWeight.Bold,
-            fontSize = 14.sp
+            fontSize = MaterialTheme.typography.titleSmall.fontSize,
+            fontWeight = FontWeight.Bold
         )
         Text(
             modifier = Modifier
-                .fillMaxWidth()
+                .alpha(ContentAlpha.medium)
                 .padding(bottom = MEDIUM_PADDING),
             text = selectedHero.about,
-            color = contentColor.copy(alpha = ContentAlpha.medium),
-            fontSize = 14.sp,
-            maxLines = 7,
-            overflow = TextOverflow.Ellipsis
+            color = contentColor,
+            fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+            maxLines = ABOUT_TEXT_MAX_LINES
         )
-
         Row(
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(SMALL_PADDING)
         ) {
-            OrderList(
+            OrderedList(
                 modifier = Modifier.weight(1f),
-                textColor = contentColor,
+                title = "Family",
                 items = selectedHero.family,
-                title = "Family"
+                textColor = contentColor
             )
-            OrderList(
+            OrderedList(
                 modifier = Modifier.weight(1f),
-                textColor = contentColor,
+                title = "Abilities",
                 items = selectedHero.abilities,
-                title = "Abilities"
+                textColor = contentColor
             )
-            OrderList(
+            OrderedList(
                 modifier = Modifier.weight(1f),
-                textColor = contentColor,
+                title = "Nature Types",
                 items = selectedHero.natureTypes,
-                title = "Nature Types"
+                textColor = contentColor
             )
         }
     }
 }
 
+
+@ExperimentalCoilApi
 @Composable
-fun OrderList(
-    title: String,
-    items: List<String>,
-    textColor: Color,
-    modifier: Modifier = Modifier
+fun BackgroundContent(
+    heroImage: String,
+    imageFraction: Float = 1f,
+    backgroundColor: Color = MaterialTheme.colorScheme.surface
 ) {
-    Column(
-        modifier = modifier
+    val imageUrl = remember { "$BASE_URL$heroImage" }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(backgroundColor)
     ) {
-        Text(
+        AsyncImage(
             modifier = Modifier
-                .padding(bottom = SMALL_PADDING),
-            fontWeight = FontWeight.Bold,
-            text = title,
-            fontSize = 22.sp,
-            color = textColor
+                .fillMaxWidth()
+                .fillMaxHeight(
+                    fraction = (imageFraction + MIN_BACKGROUND_IMAGE_HEIGHT)
+                        .coerceAtMost(maximumValue = 1.0f)
+                )
+                .align(Alignment.TopCenter),
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(data = imageUrl)
+                .error(drawableResId = R.drawable.ic_placeholder)
+                .build(),
+            contentDescription = null,
+            contentScale = ContentScale.Crop
         )
-        items.forEachIndexed { index, item ->
-            Text(
-                color = textColor,
-                fontSize = 16.sp,
-                modifier = Modifier
-                    .alpha(ContentAlpha.medium),
-                text = "${index + 1}. $item"
-            )
-        }
     }
 }
-
 
 @Composable
 fun InfoBox(
     icon: Painter,
     iconColor: Color,
-    title: String,
-    description: String,
+    bigText: String,
+    smallText: String,
     textColor: Color
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
         Icon(
-            painter = icon,
-            contentDescription = null,
             modifier = Modifier
                 .padding(end = SMALL_PADDING)
-                .size(32.dp),
-            tint = iconColor,
+                .size(INFO_ICON_SIZE),
+            painter = icon,
+            contentDescription = "",
+            tint = iconColor
         )
-        Column(
-
-        ) {
+        Column {
             Text(
-                text = title,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Black,
-                color = textColor
+                text = bigText,
+                color = textColor,
+                fontSize = MaterialTheme.typography.titleMedium.fontSize,
+                fontWeight = FontWeight.Black
             )
             Text(
-                text = description,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Black,
-                color = textColor.copy(alpha = ContentAlpha.medium)
+                modifier = Modifier.alpha(ContentAlpha.medium),
+                text = smallText,
+                color = textColor,
+                fontSize = MaterialTheme.typography.labelLarge.fontSize
             )
         }
     }
 }
 
-
 @Composable
-@Preview
-fun InfoBox(
+fun OrderedList(
+    modifier: Modifier = Modifier,
+    title: String,
+    items: List<String>,
+    textColor: Color
 ) {
-    InfoBox(
-        icon = painterResource(R.drawable.icon_calendar),
-        iconColor = welcomeScreenTitleColor(),
-        title = "HEllo",
-        description = "hello",
-        textColor = welcomeScreenTitleColor(),
-    )
-}
-
-
-@Composable
-@Preview
-fun BottomSheetContentPreview() {
-    BottomSheetContent(
-        selectedHero = Hero(
-            id = 1,
-            name = "Gojo",
-            image = "",
-            about = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-            rating = 4.5,
-            power = 100,
-            month = "Dec",
-            day = "7th",
-            family = listOf("Minato", "Kushina"),
-            abilities = listOf("Infinity", "Hollow Purple"),
-            natureTypes = listOf("Space", "Infinity")
+    Column(modifier = modifier) {
+        Text(
+            modifier = Modifier.padding(bottom = SMALL_PADDING),
+            text = title,
+            color = textColor,
+            fontSize = MaterialTheme.typography.titleLarge.fontSize,
+            fontWeight = FontWeight.Bold
         )
-    )
+        items.forEachIndexed { index, item ->
+            Text(
+                modifier = Modifier.alpha(ContentAlpha.medium),
+                text = "${index + 1}. $item",
+                color = textColor,
+                fontSize = MaterialTheme.typography.bodyLarge.fontSize
+            )
+        }
+    }
 }
+
+//@Composable
+//@Preview(showBackground = true)
+//fun OrderedListPreview() {
+//    OrderedList(
+//        title = "Family",
+//        items = listOf("Minato", "Kushina"),
+//        textColor = titleColor()
+//    )
+//}
+//
+//@Composable
+//@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+//fun OrderedListDarkPreview() {
+//    OrderedList(
+//        title = "Family",
+//        items = listOf("Minato", "Kushina"),
+//        textColor = titleColor()
+//    )
+//}
+
+//@Composable
+//@Preview
+//fun BottomSheetContentPreview() {
+//    BottomSheetContent(
+//        selectedHero = Hero(
+//            id = 1,
+//            name = "Gojo",
+//            image = "",
+//            about = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+//            rating = 4.5,
+//            power = 100,
+//            month = "Dec",
+//            day = "7th",
+//            family = listOf("Minato", "Kushina"),
+//            abilities = listOf("Infinity", "Hollow Purple"),
+//            natureTypes = listOf("Space", "Infinity")
+//        )
+//    )
+//}

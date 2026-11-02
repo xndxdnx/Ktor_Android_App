@@ -6,6 +6,7 @@ import com.example.ktor.domain.usecase.get_selected_hero.GetSelectedHeroUseCase
 import com.example.ktor.domain.usecase.read_onboarding.ReadOnboardingUseCase
 import com.example.ktor.domain.usecase.save_onboarding.SaveOnboardingUseCase
 import com.example.ktor.domain.usecase.search_heroes.SearchHeroesUseCase
+import com.example.ktor.domain.usecase.update_hero_rating.UpdateHeroRatingUseCase
 
 data class UseCases(
     val saveOnboardingUseCase : SaveOnboardingUseCase,
@@ -13,6 +14,7 @@ data class UseCases(
     val getAllHeroesUseCase: GetAllHeroesUseCase,
     val searchHeroesUseCase: SearchHeroesUseCase,
     val getSelectedHeroUseCase: GetSelectedHeroUseCase,
-    val createHeroUseCase: CreateHeroUseCase
+    val createHeroUseCase: CreateHeroUseCase,
+    val updateHeroRatingUseCase: UpdateHeroRatingUseCase
     
 )

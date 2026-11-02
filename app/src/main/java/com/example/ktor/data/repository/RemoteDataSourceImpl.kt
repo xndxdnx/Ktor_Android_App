@@ -10,6 +10,8 @@ import com.example.ktor.data.paging_sourse.HeroRemoteMediator
 import com.example.ktor.data.remote.KtorApi
 import com.example.ktor.domain.model.Hero
 import com.example.ktor.domain.model.HeroCreateRequest
+import com.example.ktor.domain.model.HeroRatingRequest
+import com.example.ktor.domain.model.isSelectableStarRating
 import com.example.ktor.domain.repository.RemoteDataSource
 import com.example.ktorinfocharacterapp.data.paging_source.SearchHeroesSource
 import kotlinx.coroutines.flow.Flow
@@ -96,5 +98,40 @@ class RemoteDataSourceImpl @Inject constructor(
         return hero
 
 
+    }
+
+    override suspend fun updateHeroRating(
+        heroId: Int,
+        rating: Int
+    ): Hero {
+        
+        if (!isSelectableStarRating(rating)) {
+             throw IllegalArgumentException("Rating must be correct") 
+        }
+        
+        
+        val response = api.updateHeroRating(
+            heroId = heroId, 
+            request = HeroRatingRequest(
+                rating = rating
+            )
+        )
+        
+        
+        if (!response.success || response.heroes.isNullOrEmpty()) {
+            throw IllegalStateException(response.message)
+        }
+        
+        val hero = response.heroes.first()
+
+        database.withTransaction {
+            heroDao.updateHeroRating(
+                heroId = hero.id,
+                rating = hero.rating
+            )
+        }
+        
+        return hero
+        
     }
 }

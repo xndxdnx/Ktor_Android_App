@@ -11,6 +11,7 @@ import com.example.ktor.domain.usecase.get_selected_hero.GetSelectedHeroUseCase
 import com.example.ktor.domain.usecase.read_onboarding.ReadOnboardingUseCase
 import com.example.ktor.domain.usecase.save_onboarding.SaveOnboardingUseCase
 import com.example.ktor.domain.usecase.search_heroes.SearchHeroesUseCase
+import com.example.ktor.domain.usecase.update_hero_rating.UpdateHeroRatingUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -39,7 +40,8 @@ object RepositoryModule {
             getAllHeroesUseCase = GetAllHeroesUseCase(repository),
             searchHeroesUseCase = SearchHeroesUseCase(repository),
             getSelectedHeroUseCase = GetSelectedHeroUseCase(repository),
-            createHeroUseCase = CreateHeroUseCase(repository)
+            createHeroUseCase = CreateHeroUseCase(repository),
+            updateHeroRatingUseCase = UpdateHeroRatingUseCase(repository)
         )
     }
     

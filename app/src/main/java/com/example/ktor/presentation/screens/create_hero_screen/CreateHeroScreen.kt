@@ -304,7 +304,7 @@ fun CreateHeroScreen(
                         onSuccess = { navHostController.popBackStack() }
                     )
                 },
-                enabled = viewModel.isLoading.value,
+                enabled = !viewModel.isLoading.value,
                 colors = ButtonDefaults.buttonColors(accent),
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier
