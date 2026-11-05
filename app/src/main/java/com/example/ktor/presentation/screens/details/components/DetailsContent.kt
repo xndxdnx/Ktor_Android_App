@@ -1,6 +1,7 @@
 package com.example.ktor.presentation.screens.details.components
 
 import android.app.Activity
+import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.graphics.Color.parseColor
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.exponentialDecay
@@ -54,6 +55,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
@@ -84,6 +86,7 @@ private enum class SheetAnchor {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DetailsContent(
+    onRatingSelected: (Int) -> Unit,
     navController: NavHostController,
     selectedHero: Hero?,
     colors: Map<String, String>,
@@ -196,6 +199,7 @@ fun DetailsContent(
                 )
                 selectedHero?.let {
                     BottomSheetContent(
+                        onRatingSelected = onRatingSelected,
                         selectedHero = it,
                         infoBoxIconColor = Color(parseColor(vibrant)),
                         sheetBackgroundColor = Color(parseColor(darkVibrant)),
@@ -226,6 +230,7 @@ fun DetailsContent(
 
 @Composable
 fun BottomSheetContent(
+    onRatingSelected: (Int) -> Unit = {},
     selectedHero: Hero,
     infoBoxIconColor: Color = MaterialTheme.colorScheme.primary,
     sheetBackgroundColor: Color = MaterialTheme.colorScheme.surface,
@@ -331,6 +336,12 @@ fun BottomSheetContent(
                 textColor = contentColor
             )
         }
+        
+        StarRatingBar(
+            onRatingSelected = onRatingSelected,
+            contentColor = contentColor,
+            rating = selectedHero.rating
+        )
     }
 }
 
@@ -446,23 +457,23 @@ fun OrderedList(
 //        textColor = titleColor()
 //    )
 //}
-
-//@Composable
-//@Preview
-//fun BottomSheetContentPreview() {
-//    BottomSheetContent(
-//        selectedHero = Hero(
-//            id = 1,
-//            name = "Gojo",
-//            image = "",
-//            about = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-//            rating = 4.5,
-//            power = 100,
-//            month = "Dec",
-//            day = "7th",
-//            family = listOf("Minato", "Kushina"),
-//            abilities = listOf("Infinity", "Hollow Purple"),
-//            natureTypes = listOf("Space", "Infinity")
-//        )
-//    )
-//}
+//
+@Composable
+@Preview
+fun BottomSheetContentPreview() {
+    BottomSheetContent(
+        selectedHero = Hero(
+            id = 1,
+            name = "Gojo",
+            image = "",
+            about = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+            rating = 4.5,
+            power = 100,
+            month = "Dec",
+            day = "7th",
+            family = listOf("Minato", "Kushina"),
+            abilities = listOf("Infinity", "Hollow Purple"),
+            natureTypes = listOf("Space", "Infinity")
+        )
+    )
+}
