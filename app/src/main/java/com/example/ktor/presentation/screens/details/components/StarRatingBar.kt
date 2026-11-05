@@ -126,8 +126,6 @@ fun RatingStar(
         label = "Star tint $star"
     )
     
-    
-    
     LaunchedEffect(filled) {
 
         val becomeFilled = filled && !vasFilled
@@ -162,9 +160,5 @@ fun RatingStar(
             .clickable(enabled) {onSelected()},
         
     )
-    
-    
-    
-
 
 }
