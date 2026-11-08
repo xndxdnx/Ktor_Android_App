@@ -6,10 +6,48 @@
     <string name="image_read_failed">Could not read the selected image. Try another photo.</string>
 
     <string name="tab_to_chose_a_portrait">Tab to chose a portrait</string>
-    
+
     <string name="image_required">Please select an image.</string>
-    
+
 
     <string name="name_required">Name is required.</string>
-    
+
+
+    <string name="app_logo">App Logo</string>
+    <string name="on_boarding_image">On Boarding Image</string>
+    <string name="search_icon">Search Icon</string>
+
+    <string name="hero_image">Hero Image</string>
+    <string name="network_error_icon">Network Error Icon</string>
+    <string name="close_icon">Close Icon</string>
+    <string name="info_icon">Info Icon</string>
+    <string name="power">Power</string>
+    <string name="month">Month</string>
+    <string name="birthday">Birthday</string>
+    <string name="about">About</string>
+    <string name="family">Family</string>
+    <string name="abilities">Abilities</string>
+    <string name="nature_types">Nature Types</string>
+    <string name="write_screen_title">New Hero</string>
+    <string name="write_screen_subtitle">Add a sorcerer to the archive</string>
+    <string name="write_photo_hint">Tap to choose a portrait</string>
+    <string name="write_section_profile">Profile</string>
+    <string name="write_section_stats">Stats</string>
+    <string name="write_section_lists">Connections</string>
+    <string name="pick_hero_image">Pick hero image</string>
+    <string name="hero_name">Name</string>
+    <string name="hero_rating">Rating</string>
+    <string name="create_hero">Create hero</string>
+    <string name="add_hero">Add hero</string>
+
+    <string name="family_csv_hint">Family (comma separated)</string>
+    <string name="abilities_csv_hint">Abilities (comma separated)</string>
+    <string name="nature_types_csv_hint">Nature types (comma separated)</string>
+    <string name="rating_failed_title">Nature types (comma separated)</string>
+    <string name="rating_saved_title">Nature types (comma separated)</string>
+    <string name="rating_saved_body">Nature types (comma separated)</string>
+    <string name="rate_hero">Nature types (comma separated)</string>
+    <string name="rate_stars">Nature types (comma separated)</string>
+
+
 </resources>

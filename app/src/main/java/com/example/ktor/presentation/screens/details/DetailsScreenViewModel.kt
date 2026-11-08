@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.ktor.domain.model.Hero
 import com.example.ktor.domain.model.isSelectableStarRating
 import com.example.ktor.domain.usecase.UseCases
+import com.example.ktor.presentation.screens.details.rating_snack_bar.RatingNotice
 import com.example.ktor.util.Constants.DETAILS_ARGUMENT_KEY
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -26,6 +27,8 @@ class DetailsScreenViewModel  @Inject constructor(
     savedStateHandle: SavedStateHandle,
 ) : ViewModel(){
     
+    val ratingNotice = mutableStateOf<RatingNotice?>(null) 
+    
     private val _selectedHero = MutableStateFlow<Hero?>(null)
     val selectedHero = _selectedHero.asStateFlow()
     
@@ -38,7 +41,28 @@ class DetailsScreenViewModel  @Inject constructor(
     
     
     private val _colorPalette: MutableState<Map<String, String>> = mutableStateOf(mapOf()) 
-    val colorPalette = _colorPalette 
+    val colorPalette = _colorPalette
+
+
+    init {
+        viewModelScope.launch(Dispatchers.IO) {
+            val heroId = savedStateHandle.get<Int>(DETAILS_ARGUMENT_KEY)
+
+            _selectedHero.value = heroId?.let { id->
+                useCases.getSelectedHeroUseCase(id)
+            }
+
+        }
+    }
+    
+    fun consumeRatingNotice(token: Long){
+        
+        if (ratingNotice.value?.token == token ) {
+            ratingNotice.value = null
+        }
+        
+    }
+    
     
     fun generateColorPalette() {
         viewModelScope.launch {
@@ -49,18 +73,6 @@ class DetailsScreenViewModel  @Inject constructor(
     fun setColorPalette(colors: Map<String, String>) {
         _colorPalette.value = colors
     }
-    
-    init {
-        viewModelScope.launch(Dispatchers.IO) {
-            val heroId = savedStateHandle.get<Int>(DETAILS_ARGUMENT_KEY)
-            
-            _selectedHero.value = heroId?.let { id->
-                useCases.getSelectedHeroUseCase(id)
-            }
-            
-        }
-    }
-    
     
      fun updateHeroRating (rating: Int) {
         
@@ -88,7 +100,17 @@ class DetailsScreenViewModel  @Inject constructor(
                     
                     if (latest?.id == updated.id && latest.rating == updated.rating) {
                         _selectedHero.value = updated
+                        
+                        ratingNotice.value = RatingNotice(
+                            errorText = null,
+                            stars = rating,
+                            isError = false,
+                            heroName = updated.name,
+                        )
+                        
+                        
                     }
+                    
                     
                     
                     
@@ -98,6 +120,14 @@ class DetailsScreenViewModel  @Inject constructor(
 
                     if (latest?.id == current.id && latest.rating == rating.toDouble()) {
                         _selectedHero.value = previous
+
+                        ratingNotice.value = RatingNotice(
+                            errorText = e.message ?: "Failed to update Rating",
+                            stars = rating,
+                            isError = true,
+                            heroName = current.name,
+                        )
+                        
                     }
                     
                     

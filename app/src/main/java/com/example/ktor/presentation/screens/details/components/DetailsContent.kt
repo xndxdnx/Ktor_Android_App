@@ -1,11 +1,17 @@
 package com.example.ktor.presentation.screens.details.components
 
 import android.app.Activity
-import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.graphics.Color.parseColor
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.exponentialDecay
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.AnchoredDraggableState
@@ -22,6 +28,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -29,7 +36,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ContentAlpha
-import androidx.compose.material.IconButton
+import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
@@ -37,6 +44,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,6 +63,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -65,6 +74,8 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.ktor.R
 import com.example.ktor.domain.model.Hero
+import com.example.ktor.presentation.screens.details.rating_snack_bar.RatingNotice
+import com.example.ktor.presentation.screens.details.rating_snack_bar.RatingSnackBar
 import com.example.ktor.ui.theme.applyDefaultSystemBars
 import com.example.ktor.util.Constants.ABOUT_TEXT_MAX_LINES
 import com.example.ktor.util.Constants.BASE_URL
@@ -75,7 +86,9 @@ import com.example.ktor.util.EXTRA_LARGE_PADDING
 import com.example.ktor.util.LARGE_PADDING
 import com.example.ktor.util.MEDIUM_PADDING
 import com.example.ktor.util.SMALL_PADDING
+import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
+import kotlin.time.Duration.Companion.milliseconds
 
 private enum class SheetAnchor {
     Bottom,
@@ -83,22 +96,62 @@ private enum class SheetAnchor {
     Top
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalCoilApi::class)
 @Composable
 fun DetailsContent(
     onRatingSelected: (Int) -> Unit,
     navController: NavHostController,
     selectedHero: Hero?,
     colors: Map<String, String>,
+    ratingNotice: RatingNotice? = null,
+    onRatingNoticeConsume:(Long) -> Unit
 ) {
+    
+    var showNotice by remember { mutableStateOf<RatingNotice?>(null) }
+    
+    var noticeVisible by remember { mutableStateOf(false) }
+
+
+    LaunchedEffect(ratingNotice?.token) {
+        
+        val notice = ratingNotice ?: return@LaunchedEffect
+        
+        showNotice = notice
+        noticeVisible = true
+        delay(2600L.milliseconds)
+        noticeVisible= false
+        delay(320L.milliseconds)
+        onRatingNoticeConsume(notice.token)
+    }
+    
+    
     val activity = LocalContext.current as Activity
     val darkTheme = isSystemInDarkTheme()
 
-    val vibrant = colors["vibrant"]!!
-    val darkVibrant = colors["darkVibrant"]!!
-    val onDarkVibrant = colors["onDarkVibrant"]!!
+    val vibrant = colors["vibrant"] ?: "#6650A4"
+    val darkVibrant = colors["darkVibrant"] ?: "#2A2A2A"
+    val onDarkVibrant = colors["onDarkVibrant"] ?: "#FFFFFF"
 
-    val sheetColor = Color(parseColor(darkVibrant))
+    fun String?.toSafeColor(fallback: Color = Color.Gray): Color {
+        val value = this?.trim()
+
+        if (value.isNullOrEmpty() ||
+            value.equals("null", ignoreCase = true)
+        ) {
+            return fallback
+        }
+
+        return try {
+            Color(parseColor(value))
+        } catch (e: IllegalArgumentException) {
+            fallback
+        }
+    }
+
+    val sheetColor = darkVibrant.toSafeColor()
+    
+    
+//    val sheetColor = Color(parseColor(darkVibrant)) 
 
     DisposableEffect(darkVibrant, darkTheme) {
         val window = activity.window
@@ -201,9 +254,17 @@ fun DetailsContent(
                     BottomSheetContent(
                         onRatingSelected = onRatingSelected,
                         selectedHero = it,
-                        infoBoxIconColor = Color(parseColor(vibrant)),
-                        sheetBackgroundColor = Color(parseColor(darkVibrant)),
-                        contentColor = Color(parseColor(onDarkVibrant))
+                        infoBoxIconColor = vibrant.toSafeColor(
+                            fallback = Color(0xFF6650A4)
+                        ),
+
+                        sheetBackgroundColor = darkVibrant.toSafeColor(
+                            fallback = Color(0xFF2A2A2A)
+                        ),
+
+                        contentColor = onDarkVibrant.toSafeColor(
+                            fallback = Color.White
+                        )
                     )
                 }
             }
@@ -224,6 +285,39 @@ fun DetailsContent(
                 contentDescription =null,
                 tint = Color.White
             )
+        }
+
+        AnimatedVisibility(
+            visible = noticeVisible,
+            modifier = Modifier
+                .align (Alignment.Center)
+                .navigationBarsPadding()
+                .padding(start = 16.dp, end = 16.dp, bottom = 18.dp),
+            
+            enter = slideInVertically(
+                initialOffsetY = { fullHeight -> fullHeight / 2 + 48 },
+                animationSpec = tween(durationMillis = 420, easing = FastOutSlowInEasing)
+            ) + fadeIn(tween(durationMillis = 280)) 
+                + scaleIn(
+                initialScale = 0.92f,
+                animationSpec = tween(durationMillis = 420, easing = FastOutSlowInEasing)
+            ),
+            exit = slideOutVertically(
+                targetOffsetY = { fullHeight -> fullHeight },
+                animationSpec = tween(durationMillis = 280)
+            ) + fadeOut(tween(durationMillis = 220))
+            
+        ) {
+            
+            showNotice?.let { notice ->
+                RatingSnackBar(
+                    errorText = notice.errorText,
+                    heroName = notice.heroName,
+                    stars = notice.stars,
+                    isError = notice.isError,
+                )
+            }
+            
         }
     }
 }

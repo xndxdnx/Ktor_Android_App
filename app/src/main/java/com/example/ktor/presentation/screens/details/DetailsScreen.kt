@@ -13,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.ktor.presentation.screens.details.components.DetailsContent
 import com.example.ktor.util.Constants.BASE_URL
@@ -66,7 +65,9 @@ fun DetailsScreen(
             onRatingSelected = viewModel::updateHeroRating,
             navController = navHostController,
             selectedHero = selectedHero,
-            colors = colorPalette.value
+            colors = colorPalette.value,
+            onRatingNoticeConsume = viewModel::consumeRatingNotice,
+            ratingNotice = viewModel.ratingNotice.value
         )
     } else {
         Box(
