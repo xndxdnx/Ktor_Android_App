@@ -290,7 +290,7 @@ fun DetailsContent(
         AnimatedVisibility(
             visible = noticeVisible,
             modifier = Modifier
-                .align (Alignment.Center)
+                .align (Alignment.BottomCenter)
                 .navigationBarsPadding()
                 .padding(start = 16.dp, end = 16.dp, bottom = 18.dp),
             
@@ -530,44 +530,4 @@ fun OrderedList(
             )
         }
     }
-}
-
-//@Composable
-//@Preview(showBackground = true)
-//fun OrderedListPreview() {
-//    OrderedList(
-//        title = "Family",
-//        items = listOf("Minato", "Kushina"),
-//        textColor = titleColor()
-//    )
-//}
-//
-//@Composable
-//@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
-//fun OrderedListDarkPreview() {
-//    OrderedList(
-//        title = "Family",
-//        items = listOf("Minato", "Kushina"),
-//        textColor = titleColor()
-//    )
-//}
-//
-@Composable
-@Preview
-fun BottomSheetContentPreview() {
-    BottomSheetContent(
-        selectedHero = Hero(
-            id = 1,
-            name = "Gojo",
-            image = "",
-            about = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-            rating = 4.5,
-            power = 100,
-            month = "Dec",
-            day = "7th",
-            family = listOf("Minato", "Kushina"),
-            abilities = listOf("Infinity", "Hollow Purple"),
-            natureTypes = listOf("Space", "Infinity")
-        )
-    )
 }

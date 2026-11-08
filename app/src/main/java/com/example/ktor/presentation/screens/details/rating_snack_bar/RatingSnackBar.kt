@@ -164,16 +164,7 @@ fun RatingSnackBar (
                         }
                     }
                 }
-                
-                
             }
-            
-            
         }
-        
-        
     }
-    
-    
-    
 }

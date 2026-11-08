@@ -26,21 +26,21 @@ class DetailsScreenViewModel  @Inject constructor(
     private val useCases: UseCases,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel(){
-    
-    val ratingNotice = mutableStateOf<RatingNotice?>(null) 
-    
+
+    val ratingNotice = mutableStateOf<RatingNotice?>(null)
+
     private val _selectedHero = MutableStateFlow<Hero?>(null)
     val selectedHero = _selectedHero.asStateFlow()
-    
-    
+
+
     private val _uiEvents = MutableSharedFlow<DetailsUIEvents>()
     val uiEvents = _uiEvents.asSharedFlow()
-    
-    
-    private val ratingMutex  = Mutex()  
-    
-    
-    private val _colorPalette: MutableState<Map<String, String>> = mutableStateOf(mapOf()) 
+
+
+    private val ratingMutex  = Mutex()
+
+
+    private val _colorPalette: MutableState<Map<String, String>> = mutableStateOf(mapOf())
     val colorPalette = _colorPalette
 
 
@@ -54,68 +54,88 @@ class DetailsScreenViewModel  @Inject constructor(
 
         }
     }
-    
+
     fun consumeRatingNotice(token: Long){
-        
+
         if (ratingNotice.value?.token == token ) {
             ratingNotice.value = null
         }
-        
+
     }
-    
-    
+
+
     fun generateColorPalette() {
         viewModelScope.launch {
             _uiEvents.emit(DetailsUIEvents.GenerateColorPalette)
         }
     }
-    
+
     fun setColorPalette(colors: Map<String, String>) {
         _colorPalette.value = colors
     }
-    
+
      fun updateHeroRating (rating: Int) {
-        
-        if (isSelectableStarRating(rating)) return
-        
-        
+
+        if (!isSelectableStarRating(rating)) return
+
+
         val current = _selectedHero.value ?: return
-        
+
         val previous = current
-        
+
         _selectedHero.value = current.copy(
             rating = rating.toDouble()
         )
-        
-        viewModelScope.launch { 
-            // получает muteсs смотрит чтобы он не был занят потом работает 
-            ratingMutex.withLock { 
-                
+
+        viewModelScope.launch {
+            // получает muteсs смотрит чтобы он не был занят потом работает
+            ratingMutex.withLock {
+
                 try {
-                
-                    val updated = useCases.updateHeroRatingUseCase(rating = rating, heroId = current.id)
-                    
+
+//                    val updated = useCases.updateHeroRatingUseCase(rating = rating, heroId = current.id)
+//
+//                    val latest = _selectedHero.value
+//
+//
+//                    if (latest?.id == updated.id && latest.rating == updated.rating) {
+//                        _selectedHero.value = updated
+//
+//                        ratingNotice.value = RatingNotice(
+//                            errorText = null,
+//                            stars = rating,
+//                            isError = false,
+//                            heroName = updated.name,
+//                        )
+//
+//
+//                    }
+
+                    val updated = useCases.updateHeroRatingUseCase(
+                        rating = rating,
+                        heroId = current.id
+                    )
+
                     val latest = _selectedHero.value
-                    
-                    
-                    if (latest?.id == updated.id && latest.rating == updated.rating) {
+
+                    if (latest?.id == updated.id &&
+                        latest.rating == rating.toDouble()
+                    ) {
                         _selectedHero.value = updated
-                        
+
                         ratingNotice.value = RatingNotice(
                             errorText = null,
                             stars = rating,
                             isError = false,
-                            heroName = updated.name,
+                            heroName = updated.name
                         )
-                        
-                        
                     }
-                    
-                    
-                    
-                    
+
+
+
+
                 }catch (e: Exception) {
-                    
+
                     val latest = _selectedHero.value
 
                     if (latest?.id == current.id && latest.rating == rating.toDouble()) {
@@ -127,17 +147,17 @@ class DetailsScreenViewModel  @Inject constructor(
                             isError = true,
                             heroName = current.name,
                         )
-                        
+
                     }
-                    
-                    
+
+
                 }
-                
-                
+
+
             }
-            
-            
+
+
         }
-        
+
     }
 }
