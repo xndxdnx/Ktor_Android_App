@@ -41,6 +41,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.itemKey
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.ktor.R
@@ -74,7 +75,11 @@ fun ListContent(
         ) {
             items(
                 count = heroes.itemCount,
-                key = { index -> heroes[index]?.id ?: index }
+
+                key = heroes.itemKey { hero ->
+                    hero.id
+                }
+//                key = { index -> heroes[index]?.id ?: index }
             ) { index ->
 
                 val hero = heroes[index]
